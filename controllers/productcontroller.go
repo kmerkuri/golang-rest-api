@@ -9,8 +9,8 @@ import (
 	"github.com/kmerkuri/golang-crud-rest-api/entities"
 )
 
-func GetProducts(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Content-Type","application/json")
+func GetProducts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var product []entities.Product
 	database.Instance.Find(&product)
 	w.WriteHeader(http.StatusOK)
@@ -18,7 +18,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request){
 }
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type","application/json")
+	w.Header().Set("Content-Type", "application/json")
 	var product entities.Product
 	json.NewDecoder(r.Body).Decode(&product)
 	database.Instance.Create(&product)
@@ -26,50 +26,49 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 func GetProductById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type","application/json")
-	productID ;= mux.Vars("id")
+	w.Header().Set("Content-Type", "application/json")
+	productID := mux.Vars(r)["id"]
 	if checkifProductExists(productID) == false {
 		json.NewEncoder(w).Encode("Product not found")
+		return
 	}
 	var product entities.Product
-	database.Instance.First(&product, productId)
+	database.Instance.First(&product, productID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(product)
 
-
 }
-func checkifProductExists(productID) {
-	w.Header().Set("Content-Type","application/json")
+
+func checkifProductExists(productID string) bool {
 	var product entities.Product
-	database.Instance.Find(&product,productID)
+	database.Instance.Find(&product, productID)
 	if product.ID == 0 {
 		return false
 	}
 	return true
 }
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type","application/json")
-	productID ;= mux.Vars("id")
+	w.Header().Set("Content-Type", "application/json")
+	productID := mux.Vars(r)["id"]
 	if checkifProductExists(productID) == false {
 		json.NewEncoder(w).Encode("Product not found")
 	}
 	var product entities.Product
-	database.Instance.First(&product, productId)
+	database.Instance.First(&product, productID)
 	json.NewDecoder(r.Body).Decode(&product)
 	database.Instance.Save(&product)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(product)
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	productId := mux.Vars(r)["id"]
-	if checkIfProductExists(productId) == false {
+	productID := mux.Vars(r)["id"]
+	if checkifProductExists(productID) == false {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode("Product Not Found!")
 		return
 	}
 	var product entities.Product
-	database.Instance.Delete(&product, productId)
+	database.Instance.Delete(&product, productID)
 	json.NewEncoder(w).Encode("Product Deleted Successfully!")
 }
